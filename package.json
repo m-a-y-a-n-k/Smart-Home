@@ -1,0 +1,24 @@
+{
+  "name": "fire_alert",
+  "version": "1.0.0",
+  "description": "Server for Smart HOME IoT sends sensor data to Firebase and notifications to Client application",
+  "main": "server.js",
+  "scripts": {
+    "test": "node"
+  },
+  "repository": {
+    "type": "git",
+    "url": "FIRE_ALERT"
+  },
+  "keywords": [
+    "PASS"
+  ],
+  "author": "m-a-y-a-n-k",
+  "license": "ISC",
+  "dependencies": {
+    "chance": "^1.0.12",
+    "express": "^4.16.2",
+    "firebase-admin": "^5.4.3",
+    "threads": "^0.8.1"
+  }
+}
