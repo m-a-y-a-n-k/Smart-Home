@@ -129,7 +129,15 @@ function updateStateRecordWindow(){
 			        			};
 			    			}
 					});
-					stateRef.child(Now).set(chance.state());
+					stateRef.child(Now).set(chance.state(),function(error){
+							if (error) {
+   								console.log("Data could not be saved." + error);
+						  	} else {
+						    	console.log("Data saved successfully.");
+						    	// send push notification 
+						    	
+						  	}
+					});
 	  })
 	  .on('done', function() {
 	    thread.kill();
@@ -161,7 +169,14 @@ function pushSensorData(t,h,l,im,om,gx,gy,gz){
     		stateRef.child(snap.val().timestamp).remove();
     	});
 	});
-	stateRef.child(Now).set(state);
+	stateRef.child(Now).set(state,function(error){
+							if (error) {
+   								console.log("Data could not be saved." + error);
+						  	} else {
+						    	console.log("Data saved successfully.");
+						    	// send push notification 
+						  	}
+					});
 }
 
 function isEmpty(obj) {
