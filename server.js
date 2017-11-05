@@ -83,7 +83,7 @@ function updateStateRecordWindow(){
 	  .send(Limit)
 	  .on('progress', function(Now) {
 	  				var Old = Now - 10*60*1000; 			// 10 minutes older data remove
-					stateRef.orderByChild('timestamp').endAt(Old).on('value', function(snapshot) {
+					stateRef.orderByChild('timestamp').endAt(Old).once('value', function(snapshot) {
     					snapshot.forEach(function(snap){
     						stateRef.child(snap.val().timestamp).remove();
     					});
@@ -156,7 +156,7 @@ function pushSensorData(t,h,l,im,om,gx,gy,gz){
 
 	var Old = Now - 10*60*1000; 			// remove all data older than 10 minutes
 	
-	stateRef.orderByChild('timestamp').endAt(Old).on('value', function(snapshot) {
+	stateRef.orderByChild('timestamp').endAt(Old).once('value', function(snapshot) {
     	snapshot.forEach(function(snap){
     		stateRef.child(snap.val().timestamp).remove();
     	});
