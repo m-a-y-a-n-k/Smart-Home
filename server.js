@@ -1,5 +1,7 @@
 /* SENDS DATA TO REAL TIME DATABASE */
 
+var colors = require('colors');
+var nodemailer = require('nodemailer');
 var admin = require("firebase-admin");
 var serviceAccount = require("./serviceAccountKey.json");
 var chance = require('chance').Chance();
@@ -13,7 +15,7 @@ admin.initializeApp({
 	credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://isecpowify.firebaseio.com/",
   databaseAuthVariableOverride: {
-    uid: "my-service-worker"
+    uid: "ADMIN_WORKER_ORG"
   }
 });
 
@@ -22,13 +24,37 @@ var db = admin.database();
 var stateRef = db.ref("/state");
 var usersRef = db.ref("/users");
 
+var transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'isecpowifymaster@gmail.com',
+    pass: 'iot_admin'
+  }
+});
 
-// store 5 random users in database untill there are 25 users in total
-function addUsers(){
-	var userCount = 0,pushCount = 0;
-	usersRef.on("value",function(snap){
-		userCount = snap.numChildren();
-		while( userCount <= 20 && pushCount < 5 ){
+function allValid(){
+    for (var i=0; i < arguments.length; i++) {
+        if( arguments[i] == null || arguments[i] == undefined ){
+        	return false;
+        }
+    }
+    return true;
+}
+
+function addNewUser( user ){
+	usersRef.push().set( user ,function(error){
+							if (error) {
+   								console.log("Data could not be saved." + error);
+						  	} else {
+						    	console.log("Data saved successfully.");
+						  	}
+					});
+}
+
+// store 10 random users in database
+function addRandomUsers(){
+	var pushCount = 0;
+	while( pushCount < 10 ){
 			var gen = chance.gender();
 			chance.mixin({
     			'user': function() {
@@ -47,17 +73,75 @@ function addUsers(){
         					};
     					}
 			});
-			usersRef.push().set( chance.user());
+			addNewUser(chance.user());
 			pushCount++;
-			userCount = snap.numChildren();
-		}
-	}, function (errorObject) {
-  		console.log("The read failed: " + errorObject.code);
-	});
-	
+	}
 }
 
+
+function isEmpty(obj) {
+  return !Object.keys(obj).length > 0;
+}
+
+app.get("/u/users",function(req,response){
+    response.writeHead(200, {'Content-type':'text/plain'});
+  	response.write('Smart Home IoT Admin created Users\n');
+   	response.end();
+
+   	usersRef.on("child_added",function(snap,prevChildKey){
+		var key = snap.key;
+		if( key != null && key != undefined ){
+			usersRef.once("value",function(snapshot){
+				if( snapshot.numChildren() > 25 ){
+					usersRef.child(key).remove();
+				} else {
+
+					// compose a mail containing user refernce key
+
+					var body = 'Dear <b>' + snap.val().name + '</b>,<br>You are now given access using one time unique token = <b><font color="red">' + key + '</font></b><br>.Please keep it safe and copy-paste the key in the mobile app<br>Thanks,<br>Regards.';
+
+					var mailOptions = {
+  						from: 'isecpowifymaster@gmail.com',
+						to: snap.val().email,
+						subject: 'APP REGISTRATION SUCCESSFUL',
+						html: body
+					};
+
+					transporter.sendMail(mailOptions, function(error, info){
+					  if (error) {
+					    console.log(error);
+					  } else {
+					    console.log('Email sent: ' + info.response);
+					  }
+					});
+				}
+			});
+		}
+	});
+
+   	var q = req.query;
+   	if( isEmpty(q) ){
+	   	addRandomUsers();
+   	} else {
+   		if( allValid(q.contact,q.dob,q.email,q.gender,q.name,q.profession,q.ssn) ){
+	   		var newUser = {
+	   			contact : q.contact, 
+	   			dob : q.dob,
+	   			email : q.email,
+	   			gender : q.gender,
+	   			name : q.name,
+	   			profession : q.profession,
+	   			ssn : q.ssn
+	   		}
+	   		addNewUser(newUser);
+   		} else {
+   			console.log('Missing Parameters Exception');
+   		}
+   	}
+});
+
 // store data packets of sensor readings for 45 minutes in database maintaining 10 minutes window of state each second
+
 function updateStateRecordWindow(){
 
 	var Now = Date.now();
@@ -178,17 +262,6 @@ function pushSensorData(t,h,l,im,om,gx,gy,gz){
 						  	}
 					});
 }
-
-function isEmpty(obj) {
-  return !Object.keys(obj).length > 0;
-}
-
-app.get("/u/users",function(req,response){
-    response.writeHead(200, {'Content-type':'text/plain'});
-  	response.write('Smart Home IoT Admin created Users\n');
-   	response.end();
-   	addUsers();
-});
 
 app.get("/u/state",function(req,response){
     response.writeHead(200, {'Content-type':'text/plain'});

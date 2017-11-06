@@ -17,8 +17,10 @@
   "license": "ISC",
   "dependencies": {
     "chance": "^1.0.12",
+    "colors": "^1.1.2",
     "express": "^4.16.2",
     "firebase-admin": "^5.4.3",
+    "nodemailer": "^4.3.1",
     "threads": "^0.8.1"
   }
 }
