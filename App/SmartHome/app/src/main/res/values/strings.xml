@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SmartHome</string>
+    <string name="preference_file_key">AUTH_USER_PREFS</string>
+    <string name="otr_message">ENTER OTR KEY ( Check Mail )</string>
+    <string name="OTRK">ONE_TIME_REGISTRATION_KEY</string>
+    <string name="otr_hint">Your key goes here</string>
+</resources>

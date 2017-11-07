@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/keySpecLayout"
+    android:clickable="true"
+    android:focusableInTouchMode="true"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/OTR"
+        android:inputType="textPassword"
+        android:clickable="true"
+        android:focusableInTouchMode="true"
+        android:textAlignment="center"
+        android:hint="@string/otr_hint"
+        android:textColor="@android:color/holo_red_dark"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
+    <TextView
+        android:id="@+id/otrMsg"
+        android:text="@string/otr_message"
+        android:textColor="@color/colorPrimaryDark"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium.Inverse"
+        android:padding="@dimen/fab_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="43dp"
+        android:layout_above="@+id/OTR"
+        android:layout_centerHorizontal="true" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_okay"
+        app:fabSize="normal"
+        android:id="@+id/otr_fab"
+        android:layout_marginTop="68dp"
+        android:layout_below="@+id/OTR"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>
