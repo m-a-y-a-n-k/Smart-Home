@@ -32,6 +32,8 @@ var transporter = nodemailer.createTransport({
   }
 });
 
+app.set('port',process.env.port||5000);
+
 function allValid(){
     for (var i=0; i < arguments.length; i++) {
         if( arguments[i] == null || arguments[i] == undefined ){
@@ -315,4 +317,6 @@ app.get("/u/state",function(req,response){
    		pushSensorData(q.temp,q.humidity,q.light,q.inDoorMotion,q.outDoorMotion,q.ax,q.ay,q.az);
    	}
 });
-app.listen(2300);
+app.listen(app.get('port'),function(){
+	console.log('Node app is running on port',app.get('port'));
+});
