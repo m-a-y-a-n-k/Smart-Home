@@ -22,5 +22,8 @@
     "firebase-admin": "^5.4.3",
     "nodemailer": "^4.3.1",
     "threads": "^0.8.1"
+  },
+  "engines": {
+    "node": "8.7.0"
   }
 }
