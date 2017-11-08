@@ -1,16 +1,23 @@
 package com.solutions.isecpowify.smarthome;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,39 +28,24 @@ public class MainActivity extends AppCompatActivity {
 
     SharedPreferences sp;
     EditText OTRK;
-    TextView tv;
-    DatabaseReference userDB;
+    TextView tv,lightValue,humValue,tempValue,msg;
+    DatabaseReference userDB,sensorDB;
+    Switch inStatus,outStatus;
+    CardView statusCard,roomCard;
+    ImageView img;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sp = Helpers.getSharedPreferences(getApplicationContext());
         userDB = FirebaseDatabase.getInstance().getReference().child("users");
+        sensorDB = FirebaseDatabase.getInstance().getReference().child("state");
 
         if( sp.contains(getString(R.string.OTRK)) ){
+
             setContentView(R.layout.activity_main);
+            selectItem(Constants.SMART_HOME_OP);
 
-            tv = (TextView)findViewById(R.id.welcome);
-            findViewById(R.id.homePage)
-                    .setBackgroundDrawable(getResources().getDrawable(R.drawable.app_background));
-            Helpers.fixBackgroundRepeat(findViewById(R.id.homePage));
-
-            userDB.child(sp.getString(getString(R.string.OTRK),"")).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    User regUser = dataSnapshot.getValue(User.class);
-                    if(regUser != null ){
-                        tv.setText("Registered as :\nName- " + regUser.name + "\nPhone- " + regUser.contact);
-                    } else{
-                        tv.setText("Welcome !. You are not registered in our DataBase ");
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.v(Constants.TAG,"The read failed: " + databaseError.getCode());
-                }
-            });
         } else {
             setContentView(R.layout.key_spec_layout);
             findViewById(R.id.keySpecLayout)
@@ -105,8 +97,72 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void selectItem(int position) {
+        // update the main content by replacing fragments
+        Fragment fragment = new OptionsFragment(MainActivity.this);
+        Bundle args = new Bundle();
+        args.putInt(Constants.ARG_OPTION_NUMBER, position);
+
+        fragment.setArguments(args);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+        // update selected item and title, then close the drawer
+        setTitle(Constants.OptionTitles[position-1]);
+    }
+
     private void showKeyboardByDefault(EditText pin) {
         pin.requestFocus();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+    }
+
+    public static class OptionsFragment extends Fragment {
+
+        private MainActivity current;
+
+        public OptionsFragment() {
+            // Empty constructor required for fragment subclasses
+        }
+
+        @SuppressLint("ValidFragment")
+        public OptionsFragment(MainActivity current) {
+            this.current = current;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            int option = getArguments().getInt(Constants.ARG_OPTION_NUMBER);
+            View rootView = inflateCorrectFragment(option, inflater, container);
+            setView(rootView, option, current);
+            return rootView;
+        }
+
+        private View inflateCorrectFragment(int option, LayoutInflater inflater, ViewGroup container) {
+            switch (option) {
+                case Constants.SENSOR_OP_CODE:
+                    return inflater.inflate(R.layout.fragment_sensors, container, false);
+                case Constants.SMART_HOME_OP:
+                default:
+                    return inflater.inflate(R.layout.fragment_smart_home, container, false);
+            }
+        }
+
+        private void setView(View rootView, int option, MainActivity current) {
+            String optionName = Constants.OptionTitles[option-1];
+            switch (option) {
+                case Constants.SENSOR_OP_CODE:
+                    if (current != null && rootView != null)
+                        Helpers.configSensorData(rootView, current);
+                    break;
+                case Constants.SMART_HOME_OP:
+                    if (current != null && rootView != null)
+                        Helpers.configSmartHome(rootView, current);
+                default:
+                    ;
+            }
+            getActivity().setTitle(optionName);
+        }
     }
 }

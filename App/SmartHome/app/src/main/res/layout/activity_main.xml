@@ -1,163 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/homePage"
-    android:background="@drawable/app_background"
+    android:id="@+id/mainApp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="8dp"
     android:padding="6dp"
     tools:context="com.solutions.isecpowify.smarthome.MainActivity">
 
-    <TextView
-        android:textColor="@color/colorPrimaryDark"
-        android:id="@+id/welcome"
-        android:layout_centerHorizontal="true"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small.Inverse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 
-    <android.support.v7.widget.CardView
-        app:cardBackgroundColor="@android:color/holo_orange_light"
-        app:cardCornerRadius="50dp"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="9dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:id="@+id/roomCard">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:text="Enter"
-                android:textColor="@android:color/primary_text_dark"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/join"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@+id/room"/>
-
-            <ImageView
-                android:id="@+id/room"
-                android:layout_centerInParent="true"
-                android:background="@drawable/ic_enter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </RelativeLayout>
-
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        app:cardBackgroundColor="#00c853"
-        app:cardCornerRadius="50dp"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:id="@+id/groupCard"
-        android:layout_marginEnd="16dp"
-        android:layout_above="@+id/roomCard"
-        android:layout_toStartOf="@+id/roomCard"
-        android:layout_marginBottom="20dp">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:text="Members"
-                android:textColor="@android:color/primary_text_dark"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/members"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@+id/group"/>
-
-            <ImageView
-                android:id="@+id/group"
-                android:layout_centerInParent="true"
-                android:background="@drawable/ic_group"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </RelativeLayout>
-
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        app:cardBackgroundColor="@android:color/holo_red_light"
-        app:cardCornerRadius="50dp"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:id="@+id/notifCard"
-        android:layout_alignParentBottom="true"
-        android:layout_alignEnd="@+id/groupCard"
-        android:layout_marginEnd="44dp">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:text="Alerts"
-                android:textColor="@android:color/primary_text_dark"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/alerts"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@+id/notify"/>
-
-            <ImageView
-                android:id="@+id/notify"
-                android:layout_centerInParent="true"
-                android:background="@drawable/ic_notifs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </RelativeLayout>
-
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        app:cardBackgroundColor="@android:color/holo_purple"
-        app:cardCornerRadius="50dp"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:id="@+id/statusCard"
-        android:layout_marginBottom="52dp"
-        android:layout_alignBottom="@+id/groupCard"
-        android:layout_alignStart="@+id/roomCard">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:text="Sensors"
-                android:textColor="@android:color/primary_text_dark"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/sensors"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@+id/status"/>
-
-            <ImageView
-                android:id="@+id/status"
-                android:layout_centerInParent="true"
-                android:background="@drawable/ic_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </RelativeLayout>
-
-    </android.support.v7.widget.CardView>
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </RelativeLayout>

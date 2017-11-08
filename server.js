@@ -32,7 +32,7 @@ var transporter = nodemailer.createTransport({
   }
 });
 
-app.set('port',process.env.port||5000);
+app.set('port',(process.env.PORT||5000));
 
 function allValid(){
     for (var i=0; i < arguments.length; i++) {
@@ -201,7 +201,7 @@ function updateStateRecordWindow(){
 				    			
 				    			return {
 								            light : chance.natural({min: 150, max: 500}),
-								            temp : chance.floating({min: 250, max: 750, fixed : 4}),
+								            temp : chance.floating({min: 250, max: 750, fixed : 3}),
 								            humidity : chance.floating({min: 0, max: 100, fixed : 2}) ,
 								            inDoorMotion : im,
 								            outDoorMotion : om,
@@ -303,8 +303,6 @@ app.get("/u/state",function(req,response){
 			});
 		}
 	});
-
-
 
    	if( isEmpty(q) ){
 
