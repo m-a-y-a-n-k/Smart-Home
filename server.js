@@ -32,7 +32,7 @@ var transporter = nodemailer.createTransport({
   }
 });
 
-app.set('port',process.env.port||5000);
+app.set('port',(process.env.PORT||5000));
 
 function allValid(){
     for (var i=0; i < arguments.length; i++) {
@@ -193,15 +193,15 @@ function updateStateRecordWindow(){
 			    					lom = 0;
 			    				}
 			    				do{
-			    					gx = chance.floating({min: 0, max: 8, fixed : 3});
-			    					gy = chance.floating({min: 0, max: 8, fixed : 3});	
-			    					gz = chance.floating({min: 0, max: 8, fixed : 3});	
+			    					gx = chance.floating({min: 0, max: 8, fixed : 2});
+			    					gy = chance.floating({min: 0, max: 8, fixed : 2});	
+			    					gz = chance.floating({min: 0, max: 8, fixed : 2});	
 			    					gs = gx*gx + gy*gy + gz*gz;
 			    				}while( gs <= 80 || gs >= 144 );
 				    			
 				    			return {
 								            light : chance.natural({min: 150, max: 500}),
-								            temp : chance.floating({min: 250, max: 750, fixed : 4}),
+								            temp : chance.floating({min: 250, max: 750, fixed : 3}),
 								            humidity : chance.floating({min: 0, max: 100, fixed : 2}) ,
 								            inDoorMotion : im,
 								            outDoorMotion : om,
@@ -235,14 +235,14 @@ function pushSensorData(t,h,l,im,om,gx,gy,gz){
 	var Now = Date.now();
 
 	var state = {
-		light : l || null,
-		temp : t || null,
-		humidity : h || null,
-		inDoorMotion : im || null ,
-		outDoorMotion : om || null ,
-		ax : gx || null ,
-		ay : gy || null,
-		az : gz || null ,
+		light : parseFloat(l) || null,
+		temp : parseFloat(t) || null,
+		humidity : parseFloat(h) || null,
+		inDoorMotion : (im==="true") || null ,
+		outDoorMotion : (om==="true") || null ,
+		ax : parseFloat(gx) || null ,
+		ay : parseFloat(gy) || null,
+		az : parseFloat(gz) || null ,
 		latestIndoorMovement : 0,
 		latestOutdoorMovement : 0,
 		timestamp : Now
@@ -303,8 +303,6 @@ app.get("/u/state",function(req,response){
 			});
 		}
 	});
-
-
 
    	if( isEmpty(q) ){
 
