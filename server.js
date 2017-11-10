@@ -233,10 +233,8 @@ function updateStateRecordWindow(){
 
 	var Now = Date.now();
 	var Limit = Now + 45*60*1000;
-
-	try {
-	    thread
-		  .send(Limit)
+	
+	thread
 		  .run(function(limit, done, progress) {
 		  	var Now = Date.now();
 
@@ -253,6 +251,7 @@ function updateStateRecordWindow(){
 		    	progress(Now,limit);
 		    }
 		  })
+		  .send(Limit)
 		  .on('progress', function(Now,limit) {
 
 		  				if( Now >= limit ){
@@ -324,16 +323,6 @@ function updateStateRecordWindow(){
 			    thread = null;		  		
 		  	}
 		  });
-	} catch(e) {
-		console.log('Exception with thread : ', e.stack());
-    	if(e.code != "ERR_IPC_CHANNEL_CLOSED")
-        {
-	            if( thread != null ){
-				    thread.kill();
-				    thread = null;		  		
-			  	}
-		}
-  	}
 	
 }
 
