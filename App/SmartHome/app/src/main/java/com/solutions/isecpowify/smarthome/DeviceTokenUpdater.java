@@ -1,11 +1,13 @@
 package com.solutions.isecpowify.smarthome;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
@@ -21,6 +23,7 @@ import okhttp3.Response;
 
 public class DeviceTokenUpdater extends FirebaseInstanceIdService {
 
+    private static Context appCtx;
     private static Map <String,String> queryParams;
     private static String currentToken = null;
     private static OkHttpClient client = new OkHttpClient().newBuilder()
@@ -45,35 +48,42 @@ public class DeviceTokenUpdater extends FirebaseInstanceIdService {
         }
     };
 
+    public DeviceTokenUpdater(Context app){
+        appCtx = app;
+    }
 
     @Override
     public void onTokenRefresh() {
 
-        // Get updated InstanceID token.
-        currentToken = FirebaseInstanceId.getInstance().getToken();
+        // Get updated InstanceID token and send details to server.
+        sendDetailsToServer(getDeviceFCMToken(),appCtx);
     }
 
     private static String getDeviceFCMToken(){
+        if( currentToken == null ){
+            currentToken = FirebaseInstanceId.getInstance().getToken();
+        }
         return currentToken;
     }
 
-    static void sendDetailsToServer(final String otrk){
+    static void sendDetailsToServer(final String token, final Context appCtx){
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while(getDeviceFCMToken()==null)
-                {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                String fcmToken = token;
+                while(fcmToken == null ){
+                    fcmToken = getDeviceFCMToken();
+                    Log.v(Constants.TAG,"No device Token found");
                 }
-                queryParams = Collections.emptyMap();
-                queryParams.put("fcm_token",getDeviceFCMToken());
-                queryParams.put("id_otr",otrk);
-                get(Constants.DEVICE_REG_SERVER,queryParams,resCB);
+                Log.v(Constants.TAG,"Found Device Token : " + fcmToken);
+                if(appCtx != null){
+                    queryParams = new HashMap<String, String>(){{
+                        put("fcm_token",getDeviceFCMToken());
+                        put("id_otr",Helpers.getSharedPreferences(appCtx).getString(appCtx.getString(R.string.OTRK),""));
+                    }};
+                    get(Constants.DEVICE_REG_SERVER,queryParams,resCB);
+                }
             }
         }).start();
     }

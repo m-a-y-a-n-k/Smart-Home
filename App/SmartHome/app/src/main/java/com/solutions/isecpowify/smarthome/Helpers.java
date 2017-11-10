@@ -2,6 +2,7 @@ package com.solutions.isecpowify.smarthome;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.bluetooth.BluetoothClass;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,6 +19,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 /**
  * Created by mayank on 5/11/17.
@@ -56,19 +58,8 @@ class Helpers {
 
     static void configSmartHome(View rootView, MainActivity current) {
 
-        try {
-            if( !alreadyRunningService(Class.forName("com.solutions.isecpowify.smarthome.DeviceTokenUpdater"),current)){
-                DeviceTokenUpdater
-                        .sendDetailsToServer(
-                                getSharedPreferences(current.getApplicationContext())
-                                        .getString(current.getString(R.string.OTRK),null)
-                        );
-            }
-        } catch (ClassNotFoundException e) {
-            Log.v("Service Class Missing: ",e.getMessage());
-        } catch (Exception e){
-            Log.v(Constants.TAG,"Token Service Updater Exception Occurred : " + e.getMessage());
-        }
+        new DeviceTokenUpdater(current);
+        DeviceTokenUpdater.sendDetailsToServer(FirebaseInstanceId.getInstance().getToken(),current);
 
         current.tv = rootView.findViewById(R.id.welcome);
         current.tv.setText("NO INTERNET CONNECTION");
@@ -104,19 +95,6 @@ class Helpers {
                 Log.v(Constants.TAG,"The read failed: " + databaseError.getCode());
             }
         });
-    }
-
-    private static boolean alreadyRunningService(Class<?> serviceClass,Context ctx) {
-
-        ActivityManager manager = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                Log.i ("Check Service Running: "+serviceClass.getName(), true+"");
-                return true;
-            }
-        }
-        Log.i ("Check Service Running: "+serviceClass.getName(), false+"");
-        return false;
     }
 
     private static void setRoomEvent(View rootView, MainActivity curr) {
