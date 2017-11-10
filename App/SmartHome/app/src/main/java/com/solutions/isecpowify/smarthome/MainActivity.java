@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
 
             setContentView(R.layout.activity_main);
             selectItem(Constants.SMART_HOME_OP);
-
         } else {
             setContentView(R.layout.key_spec_layout);
             findViewById(R.id.keySpecLayout)

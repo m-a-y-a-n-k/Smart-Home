@@ -315,6 +315,23 @@ app.get("/u/state",function(req,response){
    		pushSensorData(q.temp,q.humidity,q.light,q.inDoorMotion,q.outDoorMotion,q.ax,q.ay,q.az);
    	}
 });
+
+app.get("/u/device",function(req,response){
+    response.writeHead(200, {'Content-type':'text/plain'});
+  	response.write('Smart Home Device Registartion End Point\n');
+   	response.end();
+   	var q = req.query;
+
+  	if( !isEmpty(q) ){
+
+   		if( allValid(q.fcm_token,q.id_otr) ){
+   			usersRef.child(q.id_otr).update({
+   				"deviceToken" : q.fcm_token || null
+   			});
+   		}
+   	}
+});
+
 app.listen(app.get('port'),function(){
 	console.log('Node app is running on port',app.get('port'));
 });
