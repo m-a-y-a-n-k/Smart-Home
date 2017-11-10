@@ -9,17 +9,26 @@ import android.content.SharedPreferences;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by mayank on 5/11/17.
@@ -64,6 +73,8 @@ class Helpers {
         current.tv = rootView.findViewById(R.id.welcome);
         current.tv.setText("NO INTERNET CONNECTION");
         current.statusCard = rootView.findViewById(R.id.statusCard);
+        current.alertCard = rootView.findViewById(R.id.notifCard);
+
         rootView.findViewById(R.id.homePage)
                 .setBackgroundDrawable(current.getResources().getDrawable(R.drawable.app_background));
         Helpers.fixBackgroundRepeat(rootView.findViewById(R.id.homePage));
@@ -81,6 +92,12 @@ class Helpers {
                         @Override
                         public void onClick(View view) {
                             finalCurrent.selectItem(Constants.SENSOR_OP_CODE);
+                        }
+                    });
+                    finalCurrent.alertCard.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            finalCurrent.selectItem(Constants.ALERTS_OP_CODE);
                         }
                     });
                     setRoomEvent(v,finalCurrent);
@@ -289,4 +306,57 @@ class Helpers {
     private static void goBack(MainActivity current){
         current.selectItem(Constants.SMART_HOME_OP);
     }
+
+    static void configAlerts(View rootView, MainActivity current) {
+
+        rootView.findViewById(R.id.alertsLayout)
+                .setBackgroundDrawable(current.getResources().getDrawable(R.drawable.app_background));
+        fixBackgroundRepeat(rootView.findViewById(R.id.alertsLayout));
+        CardView back = rootView.findViewById(R.id.backCard);
+        current.alertsList = rootView.findViewById(R.id.alertsList);
+        current.alertsList.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(current.getApplicationContext());
+        current.alertsList.setLayoutManager(layoutManager);
+        current.alertsList.setNestedScrollingEnabled(false);
+        Toast.makeText(current.getApplicationContext(),"Loading Alerts. Please wait",Toast.LENGTH_SHORT).show();
+
+        final MainActivity finalCurrent = current;
+
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goBack(finalCurrent);
+            }
+        });
+
+        finalCurrent.alertsDB.orderByChild("timestamp").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                finalCurrent.myAlerts = new ArrayList<Alert>();
+                for (DataSnapshot alertSnap: dataSnapshot.getChildren()) {
+                    Alert a = alertSnap.getValue(Alert.class);
+//                    Log.v(Constants.TAG,alertSnap.getValue().toString());
+                    if( a != null )
+                    {
+                        a.setIcon();
+                        finalCurrent.myAlerts.add(a);
+                    }
+                }
+
+                if( finalCurrent.myAlerts != null && finalCurrent.myAlerts.size() > 0)
+                {
+                    Collections.reverse(finalCurrent.myAlerts);
+                    finalCurrent.alertsAdapter = new AlertsAdapter(finalCurrent, finalCurrent.myAlerts);
+                    finalCurrent.alertsList.setAdapter(finalCurrent.alertsAdapter);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.v(Constants.TAG,"Database Error : " + databaseError.getMessage());
+            }
+        });
+    }
+
 }

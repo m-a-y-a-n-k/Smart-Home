@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,15 +25,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     SharedPreferences sp;
     EditText OTRK;
     TextView tv,lightValue,humValue,tempValue,msg;
-    DatabaseReference userDB,sensorDB;
+    DatabaseReference userDB,sensorDB,alertsDB;
     Switch inStatus,outStatus;
-    CardView statusCard,roomCard;
+    CardView statusCard,roomCard,alertCard;
     ImageView img;
+    RecyclerView alertsList;
+    ArrayList<Alert> myAlerts;
+    RecyclerView.Adapter alertsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         sp = Helpers.getSharedPreferences(getApplicationContext());
         userDB = FirebaseDatabase.getInstance().getReference().child("users");
         sensorDB = FirebaseDatabase.getInstance().getReference().child("state");
+        alertsDB = FirebaseDatabase.getInstance().getReference().child("alerts");
 
         if( sp.contains(getString(R.string.OTRK)) ){
 
@@ -140,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
 
         private View inflateCorrectFragment(int option, LayoutInflater inflater, ViewGroup container) {
             switch (option) {
+                case Constants.ALERTS_OP_CODE:
+                    return inflater.inflate(R.layout.fragment_alerts,container,false);
                 case Constants.SENSOR_OP_CODE:
                     return inflater.inflate(R.layout.fragment_sensors, container, false);
                 case Constants.SMART_HOME_OP:
@@ -151,6 +160,11 @@ public class MainActivity extends AppCompatActivity {
         private void setView(View rootView, int option, MainActivity current) {
             String optionName = Constants.OptionTitles[option-1];
             switch (option) {
+                case Constants.ALERTS_OP_CODE:
+                    if( current != null && rootView != null ){
+                        Helpers.configAlerts(rootView,current);
+                    }
+                    break;
                 case Constants.SENSOR_OP_CODE:
                     if (current != null && rootView != null)
                         Helpers.configSensorData(rootView, current);

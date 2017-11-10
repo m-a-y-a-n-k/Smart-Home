@@ -10,7 +10,10 @@ var app = express();
 const threads = require('threads');
 const spawn   = threads.spawn;
 const thread  = spawn(function() {});
- 
+const TEMP_THRESH = 200;
+const LIGHT_THRESH = 375;
+const HUM_THRESH = 35;
+
 admin.initializeApp({
 	credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://isecpowify.firebaseio.com/",
@@ -23,6 +26,7 @@ admin.initializeApp({
 var db = admin.database();
 var stateRef = db.ref("/state");
 var usersRef = db.ref("/users");
+var alertsRef = db.ref("/alerts");
 
 var transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -142,92 +146,195 @@ app.get("/u/users",function(req,response){
    	}
 });
 
-// store data packets of sensor readings for 45 minutes in database maintaining 10 minutes window of state each second
+function detectAnomaly(state){
 
+	var alerts = [];
+
+	// FIRE ALERT
+	if( state.temp >= TEMP_THRESH && state.humidity <= HUM_THRESH ){
+		alerts.push({
+			type : "FIRE_ALERT",
+			message : "Activate Sprinkler system if available",
+			title : "FIRE IN ROOM",
+			timestamp : state.timestamp
+		});
+	}
+
+	// INTRUDER ALERT
+	if( state.inDoorMotion == true ){
+		stateRef.child(state.timestamp).once("value",function(snap){
+			if( snap.child('members').exists() ){
+				console.log("OKAY ! There are members inside the room");
+			} else {
+				alerts.push({
+					type : "INTRUDER_ALERT",
+					message : "Activate Security System if available",
+					title : "INTRUDER IN ROOM",
+					timestamp : state.timestamp
+				});
+			}
+		});
+	}
+
+	// POWER ALERT
+	if( state.light >= LIGHT_THRESH ){
+
+		var wastage = true;
+		stateRef
+			.orderByChild('timestamp')
+			.endAt(state.timestamp)
+			.limitToLast(2*60)
+			.once("value",function(snap){
+
+				snap.forEach(
+					function(data){
+	    				if( data.val().light < LIGHT_THRESH ){
+	    					wastage = false;
+	    				}
+	    			}
+	    		);
+	    		if( wastage ){
+	    			alerts.push({
+						type : "POWER_ALERT",
+						message : "Activate Power Management System if available",
+						title : "POWER WASTE",
+						timestamp : state.timestamp
+	    			});
+	    		}
+		});
+	}
+
+	alerts.forEach( function(alert, index) {
+		alertsRef.orderByChild('type').equalTo(alert.type).once("value",function(snap){
+			const a = snap.val();
+			if(a){
+				// alert exists update it
+				snap.forEach(function(data){
+					alertsRef.child(data.key).update(alert);	
+				})
+				
+			} else {
+				// alert does not exist create it
+				alertsRef.push().set(alert,function(error){
+					if( error ){
+						console.log("Alert creation failed");
+					} else {
+						console.log("Created New Alert");
+					}
+				});
+			}
+		});
+	});
+
+}
+
+// store data packets of sensor readings for 45 minutes in database maintaining 10 minutes window of state each second
 function updateStateRecordWindow(){
 
 	var Now = Date.now();
 	var Limit = Now + 45*60*1000;
 
-	thread
-	  .run(function(limit, done, progress) {
-	  	var Now = Date.now();
+	try {
+	    thread
+		  .send(Limit)
+		  .run(function(limit, done, progress) {
+		  	var Now = Date.now();
 
-		function sleep(time) {
-    		var stop = Date.now();
-    		while(Date.now() < stop + time) {
-        		;
-    		}
+			function sleep(time) {
+	    		var stop = Date.now();
+	    		while(Date.now() < stop + time) {
+	        		;
+	    		}
+			}
+		    setTimeout(done, limit - Now);					// 45 minutes time limit
+		    while(Now <= limit){
+		    	sleep(1000);								// publish progress after 1 second
+		    	Now = Date.now();
+		    	progress(Now,limit);
+		    }
+		  })
+		  .on('progress', function(Now,limit) {
+
+		  				if( Now >= limit ){
+		  					;
+		  				} else{
+		  					var Old = Now - 10*60*1000; 			// 10 minutes older data remove
+							stateRef.orderByChild('timestamp').endAt(Old).once('value', function(snapshot) {
+		    					snapshot.forEach(function(snap){
+		    						stateRef.child(snap.val().timestamp).remove();
+		    					});
+							});
+							var lim,lom,gx,gy,gz,gs,im,om;
+							chance.mixin({
+					    		'state': function() {
+
+					    				im = chance.bool({likelihood: 40});
+					    				om = chance.bool({likelihood: 60}); 
+					    				if( im == true ){
+					    					lim = Now;
+					    				}
+					    				if( om == true ){
+					    					lom = Now;
+					    				}
+					    				if( lim == null || lim == undefined ){
+					    					lim = 0;
+					    				}
+					    				if( lom == null || lom == undefined ){
+					    					lom = 0;
+					    				}
+					    				do{
+					    					gx = chance.floating({min: 0, max: 8, fixed : 2});
+					    					gy = chance.floating({min: 0, max: 8, fixed : 2});	
+					    					gz = chance.floating({min: 0, max: 8, fixed : 2});	
+					    					gs = gx*gx + gy*gy + gz*gz;
+					    				}while( gs <= 80 || gs >= 144 );
+						    			
+						    			return {
+										            light : chance.natural({min: 150, max: 500}),
+										            temp : chance.floating({min: -40, max: 250, fixed : 3}),
+										            humidity : chance.floating({min: 0, max: 100, fixed : 2}) ,
+										            inDoorMotion : im,
+										            outDoorMotion : om,
+										            ax : gx,
+										            ay : gy,
+										            az : gz,
+										            latestIndoorMovement : lim,
+										            latestOutdoorMovement : lom,
+										            timestamp : Now
+										            
+					        			};
+					    			}
+							});
+							var n = chance.state();
+							stateRef.child(Now).set(n,function(error){
+									if (error) {
+		   								console.log("Data could not be saved." + error);
+								  	} else {
+								    	console.log("Data saved successfully.");
+								    	// send push notification and update Alerts DB
+								    	detectAnomaly(n);
+								  	}
+							});	
+		  				}
+		  				
+		  })
+		  .on('done', function() {
+		  	if( thread != null ){
+			    thread.kill();
+			    thread = null;		  		
+		  	}
+		  });
+	} catch(e) {
+		console.log('Exception with thread : ', e.stack());
+    	if(e.code != "ERR_IPC_CHANNEL_CLOSED")
+        {
+	            if( thread != null ){
+				    thread.kill();
+				    thread = null;		  		
+			  	}
 		}
-	    setTimeout(done, limit - Now);					// 45 minutes time limit
-	    while(Now <= limit){
-	    	sleep(1000);								// publish progress after 1 second
-	    	Now = Date.now();
-	    	progress(Now);
-	    }
-	  })
-	  .send(Limit)
-	  .on('progress', function(Now) {
-	  				var Old = Now - 10*60*1000; 			// 10 minutes older data remove
-					stateRef.orderByChild('timestamp').endAt(Old).once('value', function(snapshot) {
-    					snapshot.forEach(function(snap){
-    						stateRef.child(snap.val().timestamp).remove();
-    					});
-					});
-					var lim,lom,gx,gy,gz,gs,im,om;
-					chance.mixin({
-			    		'state': function() {
-
-			    				im = chance.bool({likelihood: 40});
-			    				om = chance.bool({likelihood: 60}); 
-			    				if( im == true ){
-			    					lim = Now;
-			    				}
-			    				if( om == true ){
-			    					lom = Now;
-			    				}
-			    				if( lim == null || lim == undefined ){
-			    					lim = 0;
-			    				}
-			    				if( lom == null || lom == undefined ){
-			    					lom = 0;
-			    				}
-			    				do{
-			    					gx = chance.floating({min: 0, max: 8, fixed : 2});
-			    					gy = chance.floating({min: 0, max: 8, fixed : 2});	
-			    					gz = chance.floating({min: 0, max: 8, fixed : 2});	
-			    					gs = gx*gx + gy*gy + gz*gz;
-			    				}while( gs <= 80 || gs >= 144 );
-				    			
-				    			return {
-								            light : chance.natural({min: 150, max: 500}),
-								            temp : chance.floating({min: 250, max: 750, fixed : 3}),
-								            humidity : chance.floating({min: 0, max: 100, fixed : 2}) ,
-								            inDoorMotion : im,
-								            outDoorMotion : om,
-								            ax : gx,
-								            ay : gy,
-								            az : gz,
-								            latestIndoorMovement : lim,
-								            latestOutdoorMovement : lom,
-								            timestamp : Now
-								            
-			        			};
-			    			}
-					});
-					stateRef.child(Now).set(chance.state(),function(error){
-							if (error) {
-   								console.log("Data could not be saved." + error);
-						  	} else {
-						    	console.log("Data saved successfully.");
-						    	// send push notification 
-						    	
-						  	}
-					});
-	  })
-	  .on('done', function() {
-	    thread.kill();
-	  });
+  	}
+	
 }
 
 function pushSensorData(t,h,l,im,om,gx,gy,gz){
@@ -260,7 +367,8 @@ function pushSensorData(t,h,l,im,om,gx,gy,gz){
    								console.log("Data could not be saved." + error);
 						  	} else {
 						    	console.log("Data saved successfully.");
-						    	// send push notification 
+						    	// send push notification and update alerts DB
+						    	detectAnomaly(state);
 						  	}
 					});
 }
