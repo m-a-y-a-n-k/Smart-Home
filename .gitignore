@@ -61,6 +61,7 @@ typings/
 # All json files
 *.json
 !package*
+!service*
 
 # All rules
 *.rules
