@@ -162,8 +162,9 @@ function detectAnomaly(state){
 
 	// INTRUDER ALERT
 	if( state.inDoorMotion == true ){
-		stateRef.child(state.timestamp).once("value",function(snap){
-			if( snap.child('members').exists() ){
+		stateRef.child(state.timestamp).child('members').once("value",function(snap){
+			const m = snap.val();
+			if( m ){
 				console.log("OKAY ! There are members inside the room");
 			} else {
 				alerts.push({
@@ -334,8 +335,8 @@ function pushSensorData(t,h,l,im,om,gx,gy,gz){
 		light : parseFloat(l) || null,
 		temp : parseFloat(t) || null,
 		humidity : parseFloat(h) || null,
-		inDoorMotion : (im==="true") || null ,
-		outDoorMotion : (om==="true") || null ,
+		inDoorMotion : (im=="true"),
+		outDoorMotion : (om=="true"),
 		ax : parseFloat(gx) || null ,
 		ay : parseFloat(gy) || null,
 		az : parseFloat(gz) || null ,
