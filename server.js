@@ -331,12 +331,29 @@ function pushSensorData(t,h,l,im,om,gx,gy,gz){
 
 	var Now = Date.now();
 
+	if( im == null || im == undefined){
+		im = false;
+	} else if( im == "true"){
+		im = true;
+	} else {
+		im = false;
+	}
+
+
+	if( om == null || om == undefined ){
+		om = false;
+	} else if( om == "true"){
+		om = true;
+	} else {
+		om = false;
+	}
+
 	var state = {
 		light : parseFloat(l) || null,
 		temp : parseFloat(t) || null,
 		humidity : parseFloat(h) || null,
-		inDoorMotion : (im=="true"),
-		outDoorMotion : (om=="true"),
+		inDoorMotion : im,
+		outDoorMotion : om,
 		ax : parseFloat(gx) || null ,
 		ay : parseFloat(gy) || null,
 		az : parseFloat(gz) || null ,
