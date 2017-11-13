@@ -389,11 +389,11 @@ app.get("/u/state",function(req,response){
    	stateRef.on("child_added",function(snapshot,prevChildKey){
 		var newState = snapshot.val();
 		var prevState;
-		if( prevChildKey != null )
+		if( prevChildKey != null)
 		{
 			stateRef.child(prevChildKey).on("value",function(snap){
 				prevState = snap.val();
-				if( prevState != null && prevState != undefined ){
+				if( prevState != null && prevState != undefined  && newState != null  && newState != undefined){
 					var lim,lom,ts;
 					lim = newState.latestIndoorMovement;
 					lom = newState.latestOutdoorMovement;
