@@ -47,6 +47,10 @@ public class DeviceTokenUpdater extends FirebaseInstanceIdService {
         }
     };
 
+    public DeviceTokenUpdater(){
+
+    }
+
     public DeviceTokenUpdater(Context app){
         appCtx = app;
     }

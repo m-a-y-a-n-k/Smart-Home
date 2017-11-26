@@ -330,22 +330,29 @@ function updateStateRecordWindow(){
 function pushSensorData(t,h,l,im,om,gx,gy,gz){
 
 	var Now = Date.now();
+	var lim,lom;
 
 	if( im == null || im == undefined){
 		im = false;
+		lim = 0;
 	} else if( im == "true"){
 		im = true;
+		lim = Now;
 	} else {
 		im = false;
+		lim = 0;
 	}
 
 
 	if( om == null || om == undefined ){
 		om = false;
+		lom = 0;
 	} else if( om == "true"){
 		om = true;
+		lom = Now;
 	} else {
 		om = false;
+		lom = 0;
 	}
 
 	var state = {
