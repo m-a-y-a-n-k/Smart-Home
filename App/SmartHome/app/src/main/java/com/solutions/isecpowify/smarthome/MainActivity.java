@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     EditText OTRK;
     TextView tv,lightValue,humValue,tempValue,msg;
     DatabaseReference userDB,sensorDB,alertsDB;
-    Switch inStatus,outStatus;
+    Switch motion;
     CardView statusCard,roomCard,alertCard;
     ImageView img;
     RecyclerView alertsList;
@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case Constants.SENSOR_OP_CODE:
                     if (current != null && rootView != null)
-                        Helpers.configSensorData(rootView, current);
+                        Helpers.showLatestSensorReadings(rootView, current);
                     break;
                 case Constants.SMART_HOME_OP:
                     if (current != null && rootView != null)

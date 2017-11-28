@@ -5,8 +5,8 @@ package com.solutions.isecpowify.smarthome;
  */
 
 class State {
-    public Double temp,humidity,light,ax,ay,az,timestamp,latestIndoorMovement,latestOutdoorMovement;
-    public boolean inDoorMotion,outDoorMotion;
+    public Double temp,humidity,light,ax,ay,az,timestamp,latestMovement;
+    public boolean motion;
     State(){
         // empty constructor
     }

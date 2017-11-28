@@ -74,7 +74,9 @@ class Helpers {
         current.tv.setText("NO INTERNET CONNECTION");
         current.statusCard = rootView.findViewById(R.id.statusCard);
         current.alertCard = rootView.findViewById(R.id.notifCard);
-
+        current.statusCard.setVisibility(View.INVISIBLE);
+        current.alertCard.setVisibility(View.INVISIBLE);
+        current.roomCard.setVisibility(View.INVISIBLE);
         rootView.findViewById(R.id.homePage)
                 .setBackgroundDrawable(current.getResources().getDrawable(R.drawable.app_background));
         Helpers.fixBackgroundRepeat(rootView.findViewById(R.id.homePage));
@@ -88,6 +90,10 @@ class Helpers {
                 User regUser = dataSnapshot.getValue(User.class);
                 if(regUser != null ){
                     finalCurrent.tv.setText("Registered User :\nName- " + regUser.name + "\nPhone- " + regUser.contact);
+                    finalCurrent.statusCard.setVisibility(View.VISIBLE);
+                    finalCurrent.alertCard.setVisibility(View.VISIBLE);
+                    v.findViewById(R.id.roomCard).setVisibility(View.VISIBLE);
+                    finalCurrent.roomCard.setVisibility(View.VISIBLE);
                     finalCurrent.statusCard.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -240,11 +246,7 @@ class Helpers {
         });
     }
 
-    static void configSensorData(View rootView, MainActivity current) {
-        showLatestSensorReadings(rootView, current);
-    }
-
-    private static void showLatestSensorReadings(View rootView,MainActivity current) {
+    static void showLatestSensorReadings(View rootView,MainActivity current) {
 
         rootView.findViewById(R.id.sensorsStatus)
                 .setBackgroundDrawable(current.getResources().getDrawable(R.drawable.app_background));
@@ -253,8 +255,7 @@ class Helpers {
         current.lightValue = rootView.findViewById(R.id.lightValue);
         current.tempValue = rootView.findViewById(R.id.tempValue);
         current.humValue = rootView.findViewById(R.id.humValue);
-        current.inStatus = rootView.findViewById(R.id.inSwitch);
-        current.outStatus = rootView.findViewById(R.id.outSwitch);
+        current.motion = rootView.findViewById(R.id.mSwitch);
 
         final MainActivity finalCurrent = current;
 
@@ -267,8 +268,7 @@ class Helpers {
                     finalCurrent.lightValue.setText(String.valueOf(latestSensor.light));
                     finalCurrent.humValue.setText(String.valueOf(latestSensor.humidity));
                     finalCurrent.tempValue.setText(String.valueOf(latestSensor.temp));
-                    finalCurrent.inStatus.setChecked(latestSensor.inDoorMotion);
-                    finalCurrent.outStatus.setChecked(latestSensor.outDoorMotion);
+                    finalCurrent.motion.setChecked(latestSensor.motion);
                 }
             }
 
