@@ -74,9 +74,12 @@ class Helpers {
         current.tv.setText("NO INTERNET CONNECTION");
         current.statusCard = rootView.findViewById(R.id.statusCard);
         current.alertCard = rootView.findViewById(R.id.notifCard);
+        current.roomCard = rootView.findViewById(R.id.roomCard);
+        current.peersCard = rootView.findViewById(R.id.groupCard);
         current.statusCard.setVisibility(View.INVISIBLE);
         current.alertCard.setVisibility(View.INVISIBLE);
         current.roomCard.setVisibility(View.INVISIBLE);
+        current.peersCard.setVisibility(View.INVISIBLE);
         rootView.findViewById(R.id.homePage)
                 .setBackgroundDrawable(current.getResources().getDrawable(R.drawable.app_background));
         Helpers.fixBackgroundRepeat(rootView.findViewById(R.id.homePage));
@@ -94,6 +97,7 @@ class Helpers {
                     finalCurrent.alertCard.setVisibility(View.VISIBLE);
                     v.findViewById(R.id.roomCard).setVisibility(View.VISIBLE);
                     finalCurrent.roomCard.setVisibility(View.VISIBLE);
+                    finalCurrent.peersCard.setVisibility(View.VISIBLE);
                     finalCurrent.statusCard.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {

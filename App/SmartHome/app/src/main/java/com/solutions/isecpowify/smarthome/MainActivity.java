@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     TextView tv,lightValue,humValue,tempValue,msg;
     DatabaseReference userDB,sensorDB,alertsDB;
     Switch motion;
-    CardView statusCard,roomCard,alertCard;
+    CardView statusCard,roomCard,alertCard,peersCard;
     ImageView img;
     RecyclerView alertsList;
     ArrayList<Alert> myAlerts;
