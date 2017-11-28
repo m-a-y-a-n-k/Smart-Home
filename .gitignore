@@ -60,6 +60,7 @@ typings/
 
 # All json files
 *.json
+!serviceAccountKey.json
 !package*
 
 # All rules
